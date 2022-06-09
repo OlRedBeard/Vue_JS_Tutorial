@@ -17,17 +17,24 @@
             [v-cloak] {
                 display: none;
             }
+            input {
+                margin: 10px;
+                display: block;
+            }
         </style>
     </head>
     <body>
         <!-- v-cloak prevents any elements from rendering until 
             the vue app is fully loaded-->
         <div id="app" v-cloak> 
-            {{ greeting }}
+            <!-- {{ greeting }} -->
+
+            <!-- custom form component -->
+            <login-form />
 
             <!-- event to listen for key presses -->
-            <input @keyup.enter="greet(greeting + !!!)" 
-                v-model="greeting" />
+            <!-- <input @keyup.enter="greet(greeting + !!!)" 
+                v-model="greeting" /> -->
             <hr />
 
             <!-- shorthand for events @click -->
@@ -46,9 +53,11 @@
             <!-- will still create div but sets the style to 
                 display: none -->
             <!-- <div v-show="isVisible" class="box"></div>  -->
-            <!-- show is more performative, 
-                    if is more commonly used -->
+            <!-- show is more performative for elements that need
+                    to be changed back and forth, if is more 
+                    commonly used -->
         </div>
+        <!-- add this to begin using vue syntax -->
         <script src="https://unpkg.com/vue@3"></script>
         <script> 
             let app = Vue.createApp({
@@ -68,6 +77,53 @@
                     }
                 }
             })
+            // add components after the app definition, before mounting the app
+
+            // custom components require a name and an options object, they also require 
+            // a template object in their options to define their structure
+            app.component('login-form', {
+                // You can shortcut v-bind by just using a colon before the label
+                template: `
+                    <form @submit.prevent="handleSubmit">
+                        <h1>{{ title }}</h1>
+                        <custom-input type="email" v-model="email" v-bind:label="emailLabel"/>
+                        <custom-input type="password" v-model="password" 
+                            :label="passwordLabel" />
+                        <button>Log In</button>   
+                    </form>
+                `, // using .prevent will prevent default behavior
+                components: ['custom-input'], // components array to find other components
+                data() {
+                    return {
+                        title: 'Login Form',
+                        email: '',
+                        password: '',
+                        emailLabel: 'Email',
+                        passwordLabel: 'Password'
+                    }
+                },
+                methods: {
+                    handleSubmit() {
+                        console.log(this.email, this.password)
+                    }
+                }
+            })
+
+            app.component('custom-input', {
+                template: `
+                    <label>
+                        {{ label }}
+                        <input type="text" v-model="inputValue">
+                    </label>
+                `,
+                props: ['label'], // define the properties passed from parent object
+                data() {
+                    return {
+                        inputValue: ''
+                    }
+                }
+            })
+
             app.mount('#app')
         </script>
     </body>
