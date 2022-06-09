@@ -86,9 +86,12 @@
                 template: `
                     <form @submit.prevent="handleSubmit">
                         <h1>{{ title }}</h1>
-                        <custom-input type="email" v-model="email" v-bind:label="emailLabel"/>
-                        <custom-input type="password" v-model="password" 
-                            :label="passwordLabel" />
+                        <custom-input 
+                            v-for="(input, i) in inputs"
+                            :key="i"
+                            v-model="input.value" 
+                            :label="input.label"
+                            :type="input.type"/>
                         <button>Log In</button>   
                     </form>
                 `, // using .prevent will prevent default behavior
@@ -96,6 +99,18 @@
                 data() {
                     return {
                         title: 'Login Form',
+                        inputs: [
+                            {
+                                label: 'Email',
+                                value: '',
+                                type: 'email' 
+                            },      
+                            {
+                                label: 'Password',
+                                value: '',
+                                type: 'password' 
+                            }                 
+                        ],
                         email: '',
                         password: '',
                         emailLabel: 'Email',
@@ -104,7 +119,7 @@
                 },
                 methods: {
                     handleSubmit() {
-                        console.log(this.email, this.password)
+                        console.log(this.inputs[0].value, this.inputs[1].value)
                     }
                 }
             })
@@ -113,15 +128,29 @@
                 template: `
                     <label>
                         {{ label }}
-                        <input type="text" v-model="inputValue">
+                        <input :type="type" v-model="inputValue">
                     </label>
                 `,
-                props: ['label'], // define the properties passed from parent object
-                data() {
-                    return {
-                        inputValue: ''
+                props: ['label', 'type', 'modelValue'], 
+                // define the properties passed from parent object, modelValue gets values
+                // from parent component's v-model assignments
+                computed: {
+                    inputValue: {
+                        get() {
+                            return this.modelValue
+                        },
+                        set(value) {
+                            // emits events that other components can listen to
+                            // v-model is actively listening for changes from child
+                            this.$emit('update:modelValue', value)
+                        }
                     }
-                }
+                },
+                // data() {
+                //     return {
+                //         inputValue: ''
+                //     }
+                // }
             })
 
             app.mount('#app')
